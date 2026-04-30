@@ -96,7 +96,8 @@ export default function DashboardContent() {
       .from('site_settings')
       .select('*')
       .eq('profile_id', userId)
-      .single();
+      .limit(1)
+      .maybeSingle();
     return data;
   };
 

@@ -14,13 +14,14 @@ export default function Hero({
   backgroundImage,
 }: HeroProps) {
   return (
-    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden pt-16">
+    <section className="relative w-full h-screen max-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Background */}
       {backgroundImage ? (
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url(${backgroundImage})`,
+            backgroundAttachment: 'fixed',
           }}
         />
       ) : (

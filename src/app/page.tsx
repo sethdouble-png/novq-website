@@ -42,7 +42,7 @@ export default function Home() {
         .from('site_settings')
         .select('*')
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (settingsData) {
         setSiteSettings(settingsData);
@@ -110,7 +110,7 @@ export default function Home() {
               )}
             </div>
 
-            <div className="aspect-square rounded-lg overflow-hidden border border-[#1a1a2e]">
+            <div className="relative aspect-square rounded-lg overflow-hidden border border-[#1a1a2e]">
               <ImageWithFallback
                 src={profile.avatar_url}
                 alt="NovQ"
