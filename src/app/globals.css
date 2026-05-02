@@ -71,4 +71,17 @@
   .input-field::placeholder {
     color: rgb(107, 114, 128);
   }
+
+  /* Spotify Embed Responsiveness */
+  .spotify-embed-wrapper {
+    @apply w-full;
+  }
+
+  .spotify-embed-container {
+    @apply w-full;
+  }
+
+  .spotify-embed-container iframe {
+    @apply w-full;
+  }
 }

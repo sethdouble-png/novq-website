@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AdminLayout from '@/components/AdminLayout';
 import ProfileForm from '@/components/ProfileForm';
@@ -10,9 +11,19 @@ import SiteSettingsForm from '@/components/SiteSettingsForm';
 import LinksManager from '@/components/LinksManager';
 import ReleasesManager from '@/components/ReleasesManager';
 import PressManager from '@/components/PressManager';
-import { Profile, SiteSettings, Link as LinkType, Release, PressItem } from '@/lib/types';
+import QuickAddSpotifyTracks from '@/components/QuickAddSpotifyTracks';
+import SpotifyEmbedManager from '@/components/SpotifyEmbedManager';
+
+import {
+  Profile,
+  SiteSettings,
+  Link as LinkType,
+  Release,
+  PressItem,
+} from '@/lib/types';
 
 export default function DashboardContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab') || 'profile';
 
@@ -24,47 +35,50 @@ export default function DashboardContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAllData();
-  }, []);
-
-  const fetchAllData = async () => {
-    try {
+    const load = async () => {
       setLoading(true);
 
-      // Get current user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      // 1. Load session FIRST (fixes 401)
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (!user?.id) return;
+      if (!session) {
+        // ProtectedRoute will handle redirect, but stop execution
+        setLoading(false);
+        return;
+      }
 
-      // Fetch or create profile
-      let profileData = await fetchProfile(user.id);
+      const userId = session.user.id;
+
+      // 2. Fetch or create profile
+      let profileData = await fetchProfile(userId);
       if (!profileData) {
-        profileData = await createDefaultProfile(user.id);
+        profileData = await createDefaultProfile(userId);
       }
-      if (profileData) {
-        setProfile(profileData);
 
-        // Fetch other data
-        const [settingsData, linksData, releasesData, pressData] = await Promise.all([
-          fetchSiteSettings(user.id),
-          fetchLinks(user.id),
-          fetchReleases(user.id),
-          fetchPressItems(user.id),
-        ]);
+      setProfile(profileData);
 
-        setSiteSettings(settingsData);
-        setLinks(linksData);
-        setReleases(releasesData);
-        setPressItems(pressData);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
+      // 3. Fetch all other data in parallel
+      const [settingsData, linksData, releasesData, pressData] = await Promise.all([
+        fetchSiteSettings(userId),
+        fetchLinks(userId),
+        fetchReleases(userId),
+        fetchPressItems(userId),
+      ]);
+
+      setSiteSettings(settingsData);
+      setLinks(linksData);
+      setReleases(releasesData);
+      setPressItems(pressData);
+
       setLoading(false);
-    }
-  };
+    };
+
+    load();
+  }, []);
+
+  // -----------------------------
+  // FETCH FUNCTIONS
+  // -----------------------------
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
@@ -128,6 +142,10 @@ export default function DashboardContent() {
     return data || [];
   };
 
+  // -----------------------------
+  // RENDER
+  // -----------------------------
+
   if (loading) {
     return (
       <ProtectedRoute>
@@ -147,7 +165,7 @@ export default function DashboardContent() {
         {tab === 'profile' && (
           <div>
             <h2 className="text-3xl font-bold text-[#f5f5f7] mb-8">Profile Settings</h2>
-            {profile && <ProfileForm profile={profile} onUpdate={fetchAllData} />}
+            {profile && <ProfileForm profile={profile} onUpdate={() => router.refresh()} />}
           </div>
         )}
 
@@ -158,7 +176,7 @@ export default function DashboardContent() {
               <SiteSettingsForm
                 settings={siteSettings}
                 profileId={profile.id}
-                onUpdate={fetchAllData}
+                onUpdate={() => router.refresh()}
               />
             )}
           </div>
@@ -171,7 +189,7 @@ export default function DashboardContent() {
               <LinksManager
                 profileId={profile.id}
                 links={links}
-                onUpdate={fetchAllData}
+                onUpdate={() => router.refresh()}
               />
             )}
           </div>
@@ -180,11 +198,12 @@ export default function DashboardContent() {
         {tab === 'releases' && (
           <div>
             <h2 className="text-3xl font-bold text-[#f5f5f7] mb-8">Releases</h2>
+            <QuickAddSpotifyTracks />
             {profile && (
               <ReleasesManager
                 profileId={profile.id}
                 releases={releases}
-                onUpdate={fetchAllData}
+                onUpdate={() => router.refresh()}
               />
             )}
           </div>
@@ -197,7 +216,19 @@ export default function DashboardContent() {
               <PressManager
                 profileId={profile.id}
                 pressItems={pressItems}
-                onUpdate={fetchAllData}
+                onUpdate={() => router.refresh()}
+              />
+            )}
+          </div>
+        )}
+
+        {tab === 'embeds' && (
+          <div>
+            <h2 className="text-3xl font-bold text-[#f5f5f7] mb-8">Spotify Embeds</h2>
+            {profile && (
+              <SpotifyEmbedManager
+                profileId={profile.id}
+                onUpdate={() => router.refresh()}
               />
             )}
           </div>

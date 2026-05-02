@@ -6,17 +6,29 @@ interface HeroProps {
   heading?: string;
   subheading?: string;
   backgroundImage?: string | null;
+  backgroundVideo?: string | null;
 }
 
 export default function Hero({
   heading = 'NovQ',
   subheading = 'Music Producer & Artist',
   backgroundImage,
+  backgroundVideo,
 }: HeroProps) {
   return (
     <section className="relative w-full h-screen max-h-screen flex items-center justify-center overflow-hidden pt-16">
-      {/* Background */}
-      {backgroundImage ? (
+      {/* Background Video */}
+      {backgroundVideo ? (
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src={backgroundVideo} type="video/mp4" />
+        </video>
+      ) : backgroundImage ? (
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{

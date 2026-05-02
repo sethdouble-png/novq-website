@@ -7,6 +7,8 @@ import ReleaseCard from '@/components/ReleaseCard';
 import PressCard from '@/components/PressCard';
 import Footer from '@/components/Footer';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import NewsletterSignup from '@/components/NewsletterSignup';
+import StreamingPlatformIcon from '@/components/StreamingPlatformIcon';
 import { supabase } from '@/lib/supabaseClient';
 import { Profile, Release, Link as LinkType, PressItem, SiteSettings } from '@/lib/types';
 
@@ -16,6 +18,7 @@ export default function Home() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [links, setLinks] = useState<LinkType[]>([]);
   const [pressItems, setPressItems] = useState<PressItem[]>([]);
+  const [spotifyEmbeds, setSpotifyEmbeds] = useState<Array<{ id: string; embed_code: string }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -78,6 +81,15 @@ export default function Home() {
       if (pressData) {
         setPressItems(pressData);
       }
+
+      // Fetch Spotify embeds from server API
+      const embedsResponse = await fetch('/api/spotify-embeds');
+      if (embedsResponse.ok) {
+        const embedsData = await embedsResponse.json();
+        setSpotifyEmbeds(embedsData);
+      } else {
+        console.error('Failed to fetch Spotify embeds:', embedsResponse.statusText);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -94,6 +106,7 @@ export default function Home() {
         heading={siteSettings?.hero_heading || 'NovQ'}
         subheading={siteSettings?.hero_subheading || 'Music Producer & Artist'}
         backgroundImage={profile?.hero_image_url}
+        backgroundVideo={siteSettings?.background_video_url}
       />
 
       {/* About Section */}
@@ -134,6 +147,21 @@ export default function Home() {
         </section>
       )}
 
+      {/* Spotify Embeds */}
+      <section id="music" className="section-container">
+        <h2 className="mb-12 text-[#f5f5f7]">Featured Tracks</h2>
+        <div className="space-y-10">
+          {spotifyEmbeds.map((embed) => (
+            <div key={embed.id} className="spotify-embed-wrapper">
+              <div
+                dangerouslySetInnerHTML={{ __html: embed.embed_code }}
+                className="spotify-embed-container"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Links Section */}
       {links.length > 0 && (
         <section id="links" className="section-container">
@@ -145,11 +173,14 @@ export default function Home() {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="card flex items-center justify-between group"
+                className="card flex items-center justify-between gap-3 group"
               >
-                <span className="font-semibold text-[#f5f5f7] group-hover:text-[#e11d48] transition-colors">
-                  {link.label}
-                </span>
+                <div className="flex items-center gap-3">
+                  <StreamingPlatformIcon url={link.url} />
+                  <span className="font-semibold text-[#f5f5f7] group-hover:text-[#e11d48] transition-colors">
+                    {link.label}
+                  </span>
+                </div>
                 <span className="text-gray-400 group-hover:text-[#e11d48] transition-colors">
                   →
                 </span>
@@ -170,6 +201,10 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      <section className="section-container">
+        <NewsletterSignup />
+      </section>
 
       <Footer />
     </main>

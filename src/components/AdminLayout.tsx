@@ -31,6 +31,7 @@ export default function AdminLayout({ children, activeTab }: AdminLayoutProps) {
     { label: 'Site Settings', href: '/studio/dashboard?tab=settings', id: 'settings' },
     { label: 'Links', href: '/studio/dashboard?tab=links', id: 'links' },
     { label: 'Releases', href: '/studio/dashboard?tab=releases', id: 'releases' },
+    { label: 'Spotify Embeds', href: '/studio/dashboard?tab=embeds', id: 'embeds' },
     { label: 'Press / EPK', href: '/studio/dashboard?tab=press', id: 'press' },
   ];
 

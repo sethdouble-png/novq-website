@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "NovQ - Music Producer & Artist",
   description: "Discover the cinematic soundscapes of NovQ, an innovative music producer and artist.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.svg",
   },
 };
 

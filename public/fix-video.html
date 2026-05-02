@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Background Video - NovQ</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #050509;
+            color: #f5f5f7;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .container {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #2a2a3e;
+        }
+        .btn {
+            background: #e11d48;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #dc2626;
+        }
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .success {
+            background: #064e3b;
+            border: 1px solid #10b981;
+        }
+        .error {
+            background: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+        .info {
+            background: #1e3a8a;
+            border: 1px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Background Video</h1>
+        <p>This tool will set your background video URL to <code>/videos/bakgt.mp4</code></p>
+
+        <button id="checkAuth" class="btn">1. Check Login Status</button>
+        <button id="updateVideo" class="btn" disabled>2. Update Video URL</button>
+        <button id="refreshPage" class="btn">3. Refresh Homepage</button>
+
+        <div id="status" class="status info">
+            Click "Check Login Status" first
+        </div>
+    </div>
+
+    <script>
+        const checkAuthBtn = document.getElementById('checkAuth');
+        const updateVideoBtn = document.getElementById('updateVideo');
+        const refreshPageBtn = document.getElementById('refreshPage');
+        const statusDiv = document.getElementById('status');
+
+        let isAuthenticated = false;
+
+        checkAuthBtn.addEventListener('click', async () => {
+            statusDiv.className = 'status info';
+            statusDiv.textContent = 'Checking authentication...';
+
+            try {
+                const response = await fetch('/api/site-settings');
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    isAuthenticated = true;
+                    updateVideoBtn.disabled = false;
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ You are logged in! Current video URL: ' +
+                        (data.data?.background_video_url || 'Not set');
+                } else {
+                    isAuthenticated = false;
+                    updateVideoBtn.disabled = true;
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ Not logged in. Please go to /studio and log in first.';
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Error checking auth: ' + error.message;
+            }
+        });
+
+        updateVideoBtn.addEventListener('click', async () => {
+            if (!isAuthenticated) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Please check login status first';
+                return;
+            }
+
+            statusDiv.className = 'status info';
+            statusDiv.textContent = 'Updating background video URL...';
+
+            try {
+                const response = await fetch('/api/site-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        background_video_url: '/videos/bakgt.mp4'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ Background video URL updated! The video should now appear on your homepage.';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ Error updating: ' + (data.error || 'Unknown error');
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Error: ' + error.message;
+            }
+        });
+
+        refreshPageBtn.addEventListener('click', () => {
+            window.open('/', '_blank');
+        });
+    </script>
+</body>
+</html>
