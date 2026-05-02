@@ -23,7 +23,78 @@ export default function Home() {
 
   useEffect(() => {
     fetchData();
+    const cleanup = setupRealtimeSubscriptions();
+    return cleanup;
   }, []);
+
+  const setupRealtimeSubscriptions = () => {
+    // Subscribe to profile changes
+    supabase
+      .channel('profiles')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
+        if (payload.new) {
+          setProfile(payload.new as Profile);
+        }
+      })
+      .subscribe();
+
+    // Subscribe to site settings changes
+    supabase
+      .channel('site_settings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_settings' }, (payload) => {
+        if (payload.new) {
+          setSiteSettings(payload.new as SiteSettings);
+        }
+      })
+      .subscribe();
+
+    // Subscribe to releases changes
+    supabase
+      .channel('releases')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'releases' }, () => {
+        supabase
+          .from('releases')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .then(({ data }) => {
+            if (data) setReleases(data);
+          });
+      })
+      .subscribe();
+
+    // Subscribe to links changes
+    supabase
+      .channel('links')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'links' }, () => {
+        supabase
+          .from('links')
+          .select('*')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true })
+          .then(({ data }) => {
+            if (data) setLinks(data);
+          });
+      })
+      .subscribe();
+
+    // Subscribe to press items changes
+    supabase
+      .channel('press_items')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'press_items' }, () => {
+        supabase
+          .from('press_items')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .then(({ data }) => {
+            if (data) setPressItems(data);
+          });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeAllChannels();
+    };
+  };
 
   const fetchData = async () => {
     try {
@@ -112,10 +183,10 @@ export default function Home() {
       {/* About Section */}
       {profile && (
         <section id="about" className="section-container">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-12 items-center">
             <div>
-              <h2 className="mb-6 text-[#f5f5f7]">About NovQ</h2>
-              <p className="text-lg text-gray-300 leading-relaxed mb-6">
+              <h2 className="mb-4 sm:mb-6 text-[#f5f5f7]">About NovQ</h2>
+              <p className="text-base sm:text-lg text-gray-300 leading-relaxed mb-4 sm:mb-6">
                 {profile.bio || 'Creating cinematic soundscapes that push the boundaries of music production.'}
               </p>
               {profile.tagline && (
@@ -138,8 +209,8 @@ export default function Home() {
       {/* Music / Releases Section */}
       {releases.length > 0 && (
         <section id="music" className="section-container">
-          <h2 className="mb-12 text-[#f5f5f7]">Latest Releases</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <h2 className="mb-6 sm:mb-12 text-[#f5f5f7]">Latest Releases</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {releases.map((release) => (
               <ReleaseCard key={release.id} release={release} />
             ))}
@@ -147,60 +218,53 @@ export default function Home() {
         </section>
       )}
 
-      {/* Spotify Embeds */}
-      <section id="music" className="section-container">
-        <h2 className="mb-12 text-[#f5f5f7]">Featured Tracks</h2>
-        <div className="space-y-10">
-          {spotifyEmbeds.map((embed) => (
-            <div key={embed.id} className="spotify-embed-wrapper">
-              <div
-                dangerouslySetInnerHTML={{ __html: embed.embed_code }}
-                className="spotify-embed-container"
-              />
-            </div>
-          ))}
-        </div>
-      </section>
+        <section id="music" className="section-container">
+          <h2 className="mb-6 sm:mb-12 text-[#f5f5f7]">Featured Tracks</h2>
+          <div className="space-y-6 sm:space-y-10">
+            {spotifyEmbeds.map((embed) => (
+              <div key={embed.id} className="spotify-embed-wrapper">
+                <div
+                  dangerouslySetInnerHTML={{ __html: embed.embed_code }}
+                  className="spotify-embed-container"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
 
-      {/* Links Section */}
-      {links.length > 0 && (
         <section id="links" className="section-container">
-          <h2 className="mb-12 text-[#f5f5f7]">Stream & Follow</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="mb-6 sm:mb-12 text-[#f5f5f7]">Stream & Follow</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {links.map((link) => (
               <a
                 key={link.id}
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="card flex items-center justify-between gap-3 group"
+                className="card flex items-center justify-between gap-3 group text-sm sm:text-base"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <StreamingPlatformIcon url={link.url} />
-                  <span className="font-semibold text-[#f5f5f7] group-hover:text-[#e11d48] transition-colors">
+                  <span className="font-semibold text-[#f5f5f7] group-hover:text-[#e11d48] transition-colors truncate">
                     {link.label}
                   </span>
                 </div>
-                <span className="text-gray-400 group-hover:text-[#e11d48] transition-colors">
+                <span className="text-gray-400 group-hover:text-[#e11d48] transition-colors flex-shrink-0">
                   →
                 </span>
               </a>
             ))}
           </div>
         </section>
-      )}
 
-      {/* Press / EPK Section */}
-      {pressItems.length > 0 && (
         <section id="press" className="section-container">
-          <h2 className="mb-12 text-[#f5f5f7]">Press & EPK</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <h2 className="mb-6 sm:mb-12 text-[#f5f5f7]">Press & EPK</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {pressItems.map((item) => (
               <PressCard key={item.id} item={item} />
             ))}
           </div>
         </section>
-      )}
 
       <section className="section-container">
         <NewsletterSignup />

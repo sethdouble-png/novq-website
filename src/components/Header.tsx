@@ -8,8 +8,8 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#050509]/80 backdrop-blur-md border-b border-[#1a1a2e]">
-      <nav className="section-container flex items-center justify-between py-4">
-        <Link href="/" className="text-2xl font-bold text-[#e11d48]">
+      <nav className="section-container flex items-center justify-between py-3 sm:py-4">
+        <Link href="/" className="text-xl sm:text-2xl font-bold text-[#e11d48]">
           NovQ
         </Link>
 
@@ -36,17 +36,17 @@ export default function Header() {
         </button>
 
         {/* Desktop menu */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link href="/#music" className="btn-ghost">
+        <div className="hidden md:flex items-center gap-4 lg:gap-8">
+          <Link href="/#music" className="btn-ghost text-sm lg:text-base">
             Music
           </Link>
-          <Link href="/#about" className="btn-ghost">
+          <Link href="/#about" className="btn-ghost text-sm lg:text-base">
             About
           </Link>
-          <Link href="/#press" className="btn-ghost">
+          <Link href="/#press" className="btn-ghost text-sm lg:text-base">
             Press
           </Link>
-          <Link href="/#links" className="btn-ghost">
+          <Link href="/#links" className="btn-ghost text-sm lg:text-base">
             Links
           </Link>
         </div>
@@ -54,17 +54,17 @@ export default function Header() {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="md:hidden border-t border-[#1a1a2e] px-4 py-4">
-          <Link href="/#music" className="block py-2 btn-ghost">
+        <div className="md:hidden border-t border-[#1a1a2e] px-4 py-3 sm:py-4 space-y-1">
+          <Link href="/#music" className="block py-2 btn-ghost text-sm">
             Music
           </Link>
-          <Link href="/#about" className="block py-2 btn-ghost">
+          <Link href="/#about" className="block py-2 btn-ghost text-sm">
             About
           </Link>
-          <Link href="/#press" className="block py-2 btn-ghost">
+          <Link href="/#press" className="block py-2 btn-ghost text-sm">
             Press
           </Link>
-          <Link href="/#links" className="block py-2 btn-ghost">
+          <Link href="/#links" className="block py-2 btn-ghost text-sm">
             Links
           </Link>
         </div>

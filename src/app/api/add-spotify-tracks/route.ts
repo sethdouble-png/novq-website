@@ -4,32 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-const spotifyTracks = [
-  {
-    title: 'Spotify Track 1',
-    subtitle: 'Featured Release',
-    listen_url: 'https://open.spotify.com/embed/track/2D46uc9ktc2OMBmApdsKuQ?utm_source=generator',
-    release_date: new Date().toISOString().split('T')[0],
-    sort_order: 1,
-    is_featured: true,
-  },
-  {
-    title: 'Spotify Track 2',
-    subtitle: 'Featured Release',
-    listen_url: 'https://open.spotify.com/embed/track/6b8Lrh07NDMc9rHP3JG82e?utm_source=generator',
-    release_date: new Date().toISOString().split('T')[0],
-    sort_order: 2,
-    is_featured: true,
-  },
-  {
-    title: 'Spotify Track 3',
-    subtitle: 'Featured Release',
-    listen_url: 'https://open.spotify.com/embed/track/4kZgn3ORmsigLQZuIiEVpV?utm_source=generator',
-    release_date: new Date().toISOString().split('T')[0],
-    sort_order: 3,
-    is_featured: true,
-  },
-];
+// Test tracks removed - use admin panel to add releases instead
+const spotifyTracks: any[] = [];
 
 export async function POST(request: NextRequest) {
   try {

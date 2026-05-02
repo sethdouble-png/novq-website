@@ -1,4 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" fill="#050509" rx="4"/>
-  <text x="16" y="20" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#e11d48" text-anchor="middle">NovQ</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- White cutout logo -->
+  <defs>
+    <style>
+      .logo { fill: white; }
+    </style>
+  </defs>
+  
+  <!-- NovQ - stylized cutout -->
+  <g class="logo">
+    <!-- N -->
+    <rect x="10" y="15" width="15" height="70" rx="2"/>
+    <polygon points="25,15 60,85 75,85 40,15"/>
+    <rect x="75" y="15" width="15" height="70" rx="2"/>
+  </g>
 </svg>
