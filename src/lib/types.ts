@@ -25,6 +25,10 @@ export type Release = {
   release_date: string;
   sort_order: number;
   is_featured: boolean;
+  is_upcoming: boolean;
+  pre_save_url: string | null;
+  pre_order_url: string | null;
+  enable_alerts: boolean;
 };
 
 export type PressItem = {

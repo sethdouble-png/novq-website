@@ -11,7 +11,6 @@ import SiteSettingsForm from '@/components/SiteSettingsForm';
 import LinksManager from '@/components/LinksManager';
 import ReleasesManager from '@/components/ReleasesManager';
 import PressManager from '@/components/PressManager';
-import QuickAddSpotifyTracks from '@/components/QuickAddSpotifyTracks';
 import SpotifyEmbedManager from '@/components/SpotifyEmbedManager';
 
 import {
@@ -198,7 +197,6 @@ export default function DashboardContent() {
         {tab === 'releases' && (
           <div>
             <h2 className="text-3xl font-bold text-[#f5f5f7] mb-8">Releases</h2>
-            <QuickAddSpotifyTracks />
             {profile && (
               <ReleasesManager
                 profileId={profile.id}

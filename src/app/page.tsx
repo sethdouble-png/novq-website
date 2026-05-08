@@ -21,6 +21,78 @@ export default function Home() {
   const [spotifyEmbeds, setSpotifyEmbeds] = useState<Array<{ id: string; embed_code: string }>>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .limit(1)
+        .single();
+
+      if (profileData) {
+        setProfile(profileData);
+      }
+
+      // Fetch site settings
+      const { data: settingsData } = await supabase
+        .from('site_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (settingsData) {
+        setSiteSettings(settingsData);
+      }
+
+      // Fetch releases
+      const { data: releasesData } = await supabase
+        .from('releases')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (releasesData) {
+        setReleases(releasesData);
+      }
+
+      // Fetch active links
+      const { data: linksData } = await supabase
+        .from('links')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+      if (linksData) {
+        setLinks(linksData);
+      }
+
+      // Fetch press items
+      const { data: pressData } = await supabase
+        .from('press_items')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (pressData) {
+        setPressItems(pressData);
+      }
+
+      // Fetch Spotify embeds from server API
+      const embedsResponse = await fetch('/api/spotify-embeds');
+      if (embedsResponse.ok) {
+        const embedsData = await embedsResponse.json();
+        setSpotifyEmbeds(embedsData);
+      } else {
+        console.error('Failed to fetch Spotify embeds:', embedsResponse.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
     const cleanup = setupRealtimeSubscriptions();
@@ -96,78 +168,6 @@ export default function Home() {
     };
   };
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-
-      // Fetch profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .limit(1)
-        .single();
-
-      if (profileData) {
-        setProfile(profileData);
-      }
-
-      // Fetch site settings
-      const { data: settingsData } = await supabase
-        .from('site_settings')
-        .select('*')
-        .limit(1)
-        .maybeSingle();
-
-      if (settingsData) {
-        setSiteSettings(settingsData);
-      }
-
-      // Fetch releases
-      const { data: releasesData } = await supabase
-        .from('releases')
-        .select('*')
-        .order('sort_order', { ascending: true });
-
-      if (releasesData) {
-        setReleases(releasesData);
-      }
-
-      // Fetch active links
-      const { data: linksData } = await supabase
-        .from('links')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-
-      if (linksData) {
-        setLinks(linksData);
-      }
-
-      // Fetch press items
-      const { data: pressData } = await supabase
-        .from('press_items')
-        .select('*')
-        .order('sort_order', { ascending: true });
-
-      if (pressData) {
-        setPressItems(pressData);
-      }
-
-      // Fetch Spotify embeds from server API
-      const embedsResponse = await fetch('/api/spotify-embeds');
-      if (embedsResponse.ok) {
-        const embedsData = await embedsResponse.json();
-        setSpotifyEmbeds(embedsData);
-      } else {
-        console.error('Failed to fetch Spotify embeds:', embedsResponse.statusText);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <main className="min-h-screen bg-[#050509]">
       <Header />
@@ -208,14 +208,37 @@ export default function Home() {
 
       {/* Music / Releases Section */}
       {releases.length > 0 && (
-        <section id="music" className="section-container">
-          <h2 className="mb-6 sm:mb-12 text-[#f5f5f7]">Latest Releases</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {releases.map((release) => (
-              <ReleaseCard key={release.id} release={release} />
-            ))}
-          </div>
-        </section>
+        <>
+          {/* Upcoming Releases */}
+          {releases.filter(r => r.is_upcoming).length > 0 && (
+            <section id="upcoming" className="section-container">
+              <h2 className="mb-6 sm:mb-12 text-[#f5f5f7]">Upcoming Releases</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {releases
+                  .filter(r => r.is_upcoming)
+                  .sort((a, b) => new Date(a.release_date || '').getTime() - new Date(b.release_date || '').getTime())
+                  .map((release) => (
+                    <ReleaseCard key={release.id} release={release} />
+                  ))}
+              </div>
+            </section>
+          )}
+
+          {/* Latest Releases */}
+          {releases.filter(r => !r.is_upcoming).length > 0 && (
+            <section id="music" className="section-container">
+              <h2 className="mb-6 sm:mb-12 text-[#f5f5f7]">Latest Releases</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {releases
+                  .filter(r => !r.is_upcoming)
+                  .sort((a, b) => new Date(b.release_date || '').getTime() - new Date(a.release_date || '').getTime())
+                  .map((release) => (
+                    <ReleaseCard key={release.id} release={release} />
+                  ))}
+              </div>
+            </section>
+          )}
+        </>
       )}
 
         <section id="music" className="section-container">

@@ -19,6 +19,10 @@ export default function ReleasesManager({ profileId, releases, onUpdate }: Relea
     listen_url: '',
     release_date: '',
     is_featured: false,
+    is_upcoming: false,
+    pre_save_url: '',
+    pre_order_url: '',
+    enable_alerts: true,
     cover_image_url: '',
   });
   const [loading, setLoading] = useState(false);
@@ -36,6 +40,10 @@ export default function ReleasesManager({ profileId, releases, onUpdate }: Relea
       listen_url: '',
       release_date: '',
       is_featured: false,
+      is_upcoming: false,
+      pre_save_url: '',
+      pre_order_url: '',
+      enable_alerts: true,
       cover_image_url: '',
     });
     setEditingId(null);
@@ -96,6 +104,10 @@ export default function ReleasesManager({ profileId, releases, onUpdate }: Relea
       listen_url: release.listen_url,
       release_date: release.release_date || '',
       is_featured: release.is_featured,
+      is_upcoming: release.is_upcoming || false,
+      pre_save_url: release.pre_save_url || '',
+      pre_order_url: release.pre_order_url || '',
+      enable_alerts: release.enable_alerts ?? true,
       cover_image_url: release.cover_image_url || '',
     });
     setEditingId(release.id);
@@ -201,7 +213,7 @@ export default function ReleasesManager({ profileId, releases, onUpdate }: Relea
             </div>
           </div>
 
-          <div>
+          <div className="flex gap-6">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -211,7 +223,57 @@ export default function ReleasesManager({ profileId, releases, onUpdate }: Relea
               />
               <span className="text-sm font-medium text-gray-300">Featured Release</span>
             </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.is_upcoming}
+                onChange={(e) => setFormData({ ...formData, is_upcoming: e.target.checked })}
+                className="w-4 h-4 rounded border-[#1a1a2e] bg-[#0f0f15] text-[#e11d48]"
+              />
+              <span className="text-sm font-medium text-gray-300">Upcoming Release</span>
+            </label>
           </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="pre_save_url" className="block text-sm font-medium text-gray-300 mb-2">
+                Pre-Save URL (optional)
+              </label>
+              <input
+                id="pre_save_url"
+                type="url"
+                value={formData.pre_save_url}
+                onChange={(e) => setFormData({ ...formData, pre_save_url: e.target.value })}
+                className="input-field"
+                placeholder="https://pre.ffm.to/..."
+              />
+            </div>
+
+            <div>
+              <label htmlFor="pre_order_url" className="block text-sm font-medium text-gray-300 mb-2">
+                Pre-Order URL (optional)
+              </label>
+              <input
+                id="pre_order_url"
+                type="url"
+                value={formData.pre_order_url}
+                onChange={(e) => setFormData({ ...formData, pre_order_url: e.target.value })}
+                className="input-field"
+                placeholder="https://store.example.com/..."
+              />
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.enable_alerts}
+              onChange={(e) => setFormData({ ...formData, enable_alerts: e.target.checked })}
+              className="w-4 h-4 rounded border-[#1a1a2e] bg-[#0f0f15] text-[#e11d48]"
+            />
+            <span className="text-sm font-medium text-gray-300">Enable Release Alerts for Subscribers</span>
+          </label>
 
           <ImageUpload
             label="Cover Image"
@@ -262,6 +324,11 @@ export default function ReleasesManager({ profileId, releases, onUpdate }: Relea
                   {release.is_featured && (
                     <span className="inline-block mt-2 px-2 py-1 bg-yellow-950/50 text-yellow-200 text-xs rounded border border-yellow-800">
                       Featured
+                    </span>
+                  )}
+                  {release.is_upcoming && (
+                    <span className="inline-block mt-2 ml-2 px-2 py-1 bg-blue-950/50 text-blue-200 text-xs rounded border border-blue-800">
+                      Upcoming
                     </span>
                   )}
                 </div>
