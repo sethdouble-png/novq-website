@@ -32,6 +32,7 @@ export default function DashboardContent() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [pressItems, setPressItems] = useState<PressItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -73,7 +74,7 @@ export default function DashboardContent() {
     };
 
     load();
-  }, []);
+  }, [refreshKey]);
 
   // -----------------------------
   // FETCH FUNCTIONS
@@ -141,6 +142,10 @@ export default function DashboardContent() {
     return data || [];
   };
 
+  const refreshDashboardData = () => {
+    setRefreshKey((current) => current + 1);
+  };
+
   // -----------------------------
   // RENDER
   // -----------------------------
@@ -175,7 +180,7 @@ export default function DashboardContent() {
               <SiteSettingsForm
                 settings={siteSettings}
                 profileId={profile.id}
-                onUpdate={() => router.refresh()}
+                onUpdate={refreshDashboardData}
               />
             )}
           </div>
@@ -188,7 +193,7 @@ export default function DashboardContent() {
               <LinksManager
                 profileId={profile.id}
                 links={links}
-                onUpdate={() => router.refresh()}
+                onUpdate={refreshDashboardData}
               />
             )}
           </div>
@@ -201,7 +206,7 @@ export default function DashboardContent() {
               <ReleasesManager
                 profileId={profile.id}
                 releases={releases}
-                onUpdate={() => router.refresh()}
+                onUpdate={refreshDashboardData}
               />
             )}
           </div>
@@ -214,7 +219,7 @@ export default function DashboardContent() {
               <PressManager
                 profileId={profile.id}
                 pressItems={pressItems}
-                onUpdate={() => router.refresh()}
+                onUpdate={refreshDashboardData}
               />
             )}
           </div>
