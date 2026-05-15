@@ -33,7 +33,11 @@ export default function SpotifyEmbedManager({ profileId, onUpdate }: SpotifyEmbe
       }
 
       const data = await response.json();
-      setEmbeds(data || []);
+      const sortedEmbeds = (data || []).slice().sort(
+        (a: SpotifyEmbed, b: SpotifyEmbed) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setEmbeds(sortedEmbeds);
     } catch (error) {
       console.error('Error fetching embeds:', error);
       setMessage({ type: 'error', text: 'Failed to load embeds' });
@@ -166,32 +170,40 @@ export default function SpotifyEmbedManager({ profileId, onUpdate }: SpotifyEmbe
         <div className="space-y-6">
           <h3 className="text-lg font-bold text-[#f5f5f7]">Saved Embeds ({embeds.length})</h3>
 
-          {embeds.map((embed) => (
-            <div key={embed.id} className="bg-[#1a1a2e] p-6 rounded-lg">
-              {/* Preview */}
-              <div className="mb-4 overflow-hidden rounded-lg bg-[#050509]">
-                <div
-                  dangerouslySetInnerHTML={{ __html: embed.embed_code }}
-                  className="spotify-embed-container"
-                />
-              </div>
-
-              {/* Metadata */}
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-400">
-                  <p>Added: {new Date(embed.created_at).toLocaleDateString()}</p>
-                  <p>Sort Order: {embed.sort_order}</p>
+          {embeds.map((embed, index) => {
+            const isNewest = index === 0;
+            return (
+              <div key={embed.id} className="bg-[#1a1a2e] p-6 rounded-lg">
+                {/* Preview */}
+                <div className="mb-4 overflow-hidden rounded-lg bg-[#050509]">
+                  <div
+                    dangerouslySetInnerHTML={{ __html: embed.embed_code }}
+                    className="spotify-embed-container"
+                  />
                 </div>
 
-                <button
-                  onClick={() => handleDeleteEmbed(embed.id)}
-                  className="px-4 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 font-semibold rounded-lg transition-colors border border-red-700"
-                >
-                  Delete
-                </button>
+                {/* Metadata */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="space-y-2 text-sm text-gray-400">
+                    {isNewest && (
+                      <span className="inline-flex items-center rounded-full bg-[#e11d48] px-3 py-1 text-xs uppercase tracking-[0.18em] text-white font-semibold">
+                        New Release
+                      </span>
+                    )}
+                    <p>Added: {new Date(embed.created_at).toLocaleDateString()}</p>
+                    <p>Sort Order: {embed.sort_order}</p>
+                  </div>
+
+                  <button
+                    onClick={() => handleDeleteEmbed(embed.id)}
+                    className="px-4 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 font-semibold rounded-lg transition-colors border border-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

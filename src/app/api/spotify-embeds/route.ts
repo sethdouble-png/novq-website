@@ -43,7 +43,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('spotify_embeds')
       .select('id, embed_code, sort_order, created_at')
-      .order('sort_order', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching spotify embeds:', error);

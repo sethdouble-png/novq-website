@@ -18,7 +18,7 @@ export default function Home() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [links, setLinks] = useState<LinkType[]>([]);
   const [pressItems, setPressItems] = useState<PressItem[]>([]);
-  const [spotifyEmbeds, setSpotifyEmbeds] = useState<Array<{ id: string; embed_code: string }>>([]);
+  const [spotifyEmbeds, setSpotifyEmbeds] = useState<Array<{ id: string; embed_code: string; created_at: string }>>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
@@ -82,7 +82,11 @@ export default function Home() {
       const embedsResponse = await fetch('/api/spotify-embeds');
       if (embedsResponse.ok) {
         const embedsData = await embedsResponse.json();
-        setSpotifyEmbeds(embedsData);
+        const sortedEmbeds = (embedsData || []).slice().sort(
+          (a: { created_at: string }, b: { created_at: string }) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        setSpotifyEmbeds(sortedEmbeds);
       } else {
         console.error('Failed to fetch Spotify embeds:', embedsResponse.statusText);
       }
@@ -244,14 +248,19 @@ export default function Home() {
         <section id="music" className="section-container">
           <h2 className="mb-6 sm:mb-12 text-[#f5f5f7]">Featured Tracks</h2>
           <div className="space-y-6 sm:space-y-10">
-            {spotifyEmbeds.map((embed) => (
-              <div key={embed.id} className="spotify-embed-wrapper">
-                <div
-                  dangerouslySetInnerHTML={{ __html: embed.embed_code }}
-                  className="spotify-embed-container"
-                />
-              </div>
-            ))}
+            {spotifyEmbeds.map((embed, index) => (
+            <div key={embed.id} className="spotify-embed-wrapper">
+              {index === 0 && (
+                <div className="mb-4 inline-flex items-center rounded-full bg-[#e11d48] px-3 py-1 text-xs uppercase tracking-[0.18em] text-white font-semibold">
+                  New Release
+                </div>
+              )}
+              <div
+                dangerouslySetInnerHTML={{ __html: embed.embed_code }}
+                className="spotify-embed-container"
+              />
+            </div>
+          ))}
           </div>
         </section>
 
